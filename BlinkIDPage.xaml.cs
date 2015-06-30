@@ -28,7 +28,7 @@ namespace BlinkIDDemo
             // sets license key
             // obtain your licence key at http://microblink.com/login or
             // contact us at http://help.microblink.com                   
-            mRecognizer.LicenseKey = "2QTAWG4E-HUL2CEOS-GJLNEMSX-SVFC47W2-PVBHDCSC-OGFEE4MK-IJYYUQTR-RJBAMMNO"; // (valid for 60 days and licensed to demo application ID)            
+            mRecognizer.LicenseKey = "Add license key here";
 
             // add MRTD recognizer settings
             mRecognizer.RecognizerSettings = new Microblink.IRecognizerSettings[] { new Microblink.MRTDRecognizerSettings() { DetectMRZPosition = true } };
