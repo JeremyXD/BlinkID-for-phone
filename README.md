@@ -9,20 +9,26 @@
   * [Checking if _BlinkID_ is supported](#supportCheck)
   * [Embedding `RecognizerControl` into custom application page](#recognizerControl)
   * [`RecognizerControl` reference](#recognizerControlReference)
+* [Using direct API for recognition of Android Bitmaps](#directAPI)
+  * [Understanding DirectAPI's state machine](#directAPIStateMachine)
+  * [Using DirectAPI while RecognizerControl is active](#directAPIWithRecognizer)
 * [Recognition settings and results](#recognitionSettingsAndResults)
   * [Generic settings](#genericSettings)
   * [Scanning machine-readable travel documents](#mrtd)
+  * [Scanning US Driver's licence barcodes](#usdl)
+  * [Scanning United Kingdom's driver's licences](#usdl)
 * [Troubleshooting](#troubleshoot)
   * [Integration problems](#integrationTroubleshoot)
   * [SDK problems](#sdkTroubleshoot)
 * [Additional info](#info)
+
 
 # <a name="intro"></a> Windows Phone _BlinkID_ integration instructions
 
 The package contains Visual Studio 2012 solution(can open in VS 2013) that contains everything you need to get you started with _BlinkID_ library. Demo project _BlinkIDDemo_ for Windows Phone 8.0 is included in solution containing the example use of _BlinkID_ library.
  
 _BlinkID_ is supported on Windows Phone 8.0. Windows Phone 8.1 can be supported with minor changes and Windows Phone 10 is expected to be supported soon.
-﻿
+
 # <a name="quickStart"></a> Quick Start
 
 ## <a name="quickDemo"></a> Quick start with demo app
@@ -62,14 +68,14 @@ This works the same in both _Visual Studio 2012_ or _Visual Studio 2013_
 	```
 2. You should setup `RecognizerControl` in containing page constructor like this:
 
-	```c#
+	```csharp
 	// sets license key
 	// obtain your licence key at http://microblink.com/login or
 	// contact us at http://help.microblink.com            
 	mRecognizer.LicenseKey = "Add your licence key here";
 	
 	// setup array of recognizer settings
-	mRecognizer.RecognizerSettings = new Microblink.IRecognizerSettings[] { new Microblink.MRTDRecognizerSettings() { DetectMRZPosition = true } };        
+	mRecognizer.RecognizerSettings = new Microblink.IRecognizerSettings[] { new Microblink.MRTDRecognizerSettings() };        
 	
 	// these three events must be handled
 	mRecognizer.OnCameraError += mRecognizer_OnCameraError;            
@@ -78,7 +84,7 @@ This works the same in both _Visual Studio 2012_ or _Visual Studio 2013_
 	```
 3. You should implement `OnNavigatedTo` and `OnNavigatedFrom` of your main page to initialize and terminate `RecognizerControl` respectively so `RecognizerControl` will be initialized when the user activates the page and will terminate when the user navigates away from the page. You should do it like this:
 	
-	```c#
+	```csharp
 	protected override void OnNavigatedTo(NavigationEventArgs e) {
         // call default behaviour
         base.OnNavigatedTo(e);
@@ -95,7 +101,7 @@ This works the same in both _Visual Studio 2012_ or _Visual Studio 2013_
 	```
 4. You should also implement `OnOrientationChanged` of your main page and forward the orientation change info to `RecognizerControl` like this:
 	
-	```c#
+	```csharp
 	protected override void OnOrientationChanged(OrientationChangedEventArgs e) {
         // call default behaviour
         base.OnOrientationChanged(e);            
@@ -105,7 +111,7 @@ This works the same in both _Visual Studio 2012_ or _Visual Studio 2013_
 	```
 5. After scan finishes it will trigger `OnScanningDone` event. You can obtain the scanning results by implementing the event handler something like this:
 	
-	```c#
+	```csharp
 	void mRecognizer_OnScanningDone(IList<Microblink.IRecognitionResult> resultList, RecognitionType recognitionType) {
         // display results if scan was successful
         if (recognitionType == RecognitionType.SUCCESSFUL) {
@@ -135,6 +141,7 @@ This works the same in both _Visual Studio 2012_ or _Visual Studio 2013_
 
 # <a name="advancedIntegration"></a> Advanced _BlinkID_ integration instructions
 This section will cover more advanced details in _BlinkID_ integration. First part will discuss the methods for checking whether _BlinkID_ is supported on current device. Second part will show how to embed `RecognizerControl` into custom application page. Third part is a brief `RecognizerControl` reference.
+
 ## <a name="supportCheck"></a> Checking if _BlinkID_ is supported
 
 ### _BlinkID_ requirements
@@ -183,7 +190,7 @@ Here is the minimum example of integration of `RecognizerControl` as the only co
 
 **.xaml.cs file**
 
-```c#
+```csharp
 public partial class MyPage : PhoneApplicationPage
     {
     
@@ -194,7 +201,7 @@ public partial class MyPage : PhoneApplicationPage
 		mRecognizer.LicenseKey = "Add your licence key here";
 		
 		// setup array of recognizer settings
-		mRecognizer.RecognizerSettings = new Microblink.IRecognizerSettings[] { new Microblink.MRTDRecognizerSettings() { DetectMRZPosition = true } };        
+		mRecognizer.RecognizerSettings = new Microblink.IRecognizerSettings[] { new Microblink.MRTDRecognizerSettings() };        
 		
 		// these three events must be handled
 		mRecognizer.OnCameraError += mRecognizer_OnCameraError;            
@@ -282,10 +289,10 @@ The usage example for `RecognizerControl` is provided in `BlinkIDDemo` demo app 
 This method will initialize `RecognizerControl's` internal fields and will initialize camera control thread. This method must be called after all other settings are already defined, such as event handlers and recognition settings.
 
 ##### <a name="recognizerControl_ResumeScanning"></a> `ResumeScanning()`
-This method resumes scanning loop. Scanning loop is usually paused when results have arrived and OnScanningDone event is called. You can also pause scanning loop by yourself by calling PauseScanning.
+This method resumes scanning loop. Scanning loop is usually paused when results have arrived and OnScanningDone event is raised. You can also pause scanning loop by yourself by calling PauseScanning.
 
 ##### <a name="recognizerControl_PauseScanning"></a> `PauseScanning()`
-This method pasuses scanning loop. Scanning loop is resumed by calling ResumeScanning.
+This method pauses scanning loop. Scanning loop is resumed by calling ResumeScanning.
 
 ##### <a name="recognizerControl_TerminateControl"></a> `TerminateControl()`
 This method terminates `RecognizerControl` internal state, stops the recognizers and shuts down camera control thread. Call this method when you are finished with scanning and want to free resources used up by _BlinkID_ library. You can reinitialize `RecognizerControl` by calling `InitializeControl` method.
@@ -314,16 +321,16 @@ Method to transform a point from a position in image to a position in a control 
 ### <a name="recognizerControlProperties"></a> **Properties**
 
 ##### <a name="recognizerControl_GenericRecognizerSettings"></a> `GenericRecognizerSettings`
-With this property you can set the generic settings that will affect all enabled recognizers or the whole recognition process. For more information about generic settings, see [Generic settings](#genericSettings). This method must be called before `InitializeControl()`.
+With this property you can set the generic settings that will affect all enabled recognizers or the whole recognition process. For more information about generic settings, see [Generic settings](#genericSettings). This property must be set before `InitializeControl()`.
 
 ##### <a name="recognizerControl_RecognizerSettings"></a> `RecognizerSettings`
-Array of `IRecognizerSettings` objects. Those objects will contain information about what will be scanned and how will scan be performed. For more information about recognition settings and results see [Recognition settings and results](#recognitionSettingsAndResults). This method must be called before `InitializeControl()`.
+Array of `IRecognizerSettings` objects. Those objects will contain information about what will be scanned and how will scan be performed. For more information about recognition settings and results see [Recognition settings and results](#recognitionSettingsAndResults). This property must be set before `InitializeControl()`.
 
 ##### <a name="recognizerControl_PreviewScale"></a> `PreviewScale`
 Defines the aspect mode of camera. If set to `Uniform` (default), then camera preview will be fit inside available view space. If set to `UniformToFill`, camera preview will be zoomed and cropped to use the entire view space.
 
 ##### <a name="recognizerControl_MacroMode"></a> `MacroMode`
-When set to `true` camera will focus on nearer objects more. Set to `false` by default.
+When set to `true`, camera will be optimized for near object scanning. It will focus on near objects more easily and will not be able to focus on far objects. Use this only if you plan to hold your device very near to the object you are scanning. Also, feel free to experiment with both `true` and `false` to see which better suits your use case.
 
 ##### <a name="recognizerControl_IsTorchSupported"></a> `IsTorchSupported` 
 This property is set to `true` if camera supports torch flash mode. Note that if camera is not loaded it will be set to `false`.
@@ -335,14 +342,14 @@ If torch flash mode is supported on camera, this property can be used to enable/
 With these properties you can set the license key for _BlinkID_. You can obtain your license key from [Microblink website](http://microblink.com/login) or you can contact us at [http://help.microblink.com](http://help.microblink.com).
 Once you obtain a license key, you can set it with following snippet:
 
-```c#
+```csharp
 // set the license key
 mRecognizer.LicenseKey = "Enter_License_Key_Here";
 ```
 
 License key is bound to your application ID. For example, if you have license key that is bound to `BlinkIDDemo` application ID, you cannot use the same key in other applications. However, if you purchase Premium license, you will get license key that can be used in multiple applications. This license key will then not be bound to application ID. Instead, it will be bound to the licensee string that needs to be provided to the library together with the license key. To provide licensee string, use something like this:
 
-```c#
+```csharp
 // set the license key
 mRecognizer.Licensee = "Enter_Licensee_Here";
 mRecognizer.LicenseKey = "Enter_License_Key_Here";
@@ -356,10 +363,10 @@ This event is raised when camera fails to perform autofocus even after multiple 
 ##### <a name="recognizerControl_OnCameraError"></a> `OnCameraError`
 This event is triggered on camera related errors. This event **must** be handled or the _BlinkID_ library will throw an exception. Camera errors come in four different types:
 
-*`NoCameraAtSelectedSensorLocation` - There is no camera at selected location(front or right)
-*`CameraNotReady` - Camera is not ready
-*`PreviewSizeTooSmall` - Camera preview size is smaller than required
-*`NotSupported` - Required camera is not supported
+* `NoCameraAtSelectedSensorLocation` - There is no camera at selected location(front or right)
+* `CameraNotReady` - Camera is not ready
+* `PreviewSizeTooSmall` - Camera preview size is smaller than required
+* `NotSupported` - Required camera is not supported
 
 ##### <a name="recognizerControl_OnScanningDone"></a> `OnScanningDone` 
 This event is raised when scanning finishes and scan data is ready. This event **must** be handled or the _BlinkID_ library will throw an exception. After recognition completes, `RecognizerControl` will pause its scanning loop and to continue the scanning you will have to call `ResumeScanning` method.
@@ -371,19 +378,13 @@ This event is raised when an error occurs during RecognizerControl initializatio
 Triggered after canvas is initialized and camera is ready for receiving frames.
 
 ##### <a name="recognizerControl_OnSuccessfulScanImage"></a> `OnSuccessfulScanImage` 
-Handle this event to obtain images that are currently being processed by the native library. This event will return images that resulted in a successful scan. Please take notice that installing this listener introduces a large performance penalty.
+Handle this event to obtain images that are currently being processed by the native library. This event will return images that resulted in a successful scan. Please take notice that installing this event handler introduces a large performance penalty.
 
 ##### <a name="recognizerControl_OnOriginalImage"></a> `OnOriginalImage` 
-Handle this event to obtain images that are currently being processed by the native library. This event will return original images passed to recognition process. Please take notice that installing this listener introduces a large performance penalty.
+Handle this event to obtain images that are currently being processed by the native library. This event will return original images passed to recognition process. Please take notice that installing this event handler introduces a large performance penalty.
 
 ##### <a name="recognizerControl_OnDewarpedImage"></a> `OnDewarpedImage` 
-Handle this event to obtain images that are currently being processed by the native library. This event will return dewarped images from the recognition process. Please take notice that installing this listener introduces a large performance penalty.
-
-##### <a name="recognizerControl_OnDisplayDebugStatus"></a> `OnDisplayDebugStatus` 
-This event is raised when recognizer control wants to display some debug status. Useful for finding bugs in code.
-
-##### <a name="recognizerControl_OnDisplayMessage"></a> `OnDisplayMessage` 
-This event is rased when recognizer wants to display some message.
+Handle this event to obtain images that are currently being processed by the native library. This event will return dewarped images from the recognition process. Please take notice that installing this event handler introduces a large performance penalty.
 
 ##### <a name="recognizerControl_OnDisplayDefaultTarget"></a> `OnDisplayDefaultTarget` 
 This event is raised when recognizer wants to put viewfinder in its default position (for example if detection has failed).
@@ -401,6 +402,80 @@ Image coordinates refer to coordinates in video frame that has been analyzed. Us
         
 ##### <a name="recognizerControl_OnShakingStartedEvent"></a> `OnShakingStartedEvent` 
 Event is triggered when device shaking starts.
+
+# <a name="directAPI"></a> Using direct API for recognition of Android Bitmaps
+
+This section will describe how to use direct API to recognize Windows Phone images without the need for camera.
+
+1. First, you need to obtain reference to `Recognizer` singleton.
+2. Second, you need to initialize the recognizer.
+3. After initialization, you can use the singleton to process images. You cannot process multiple images in parallel.
+4. Do not forget to terminate the recognizer after usage (it is a shared resource).
+
+Here is the minimum example of usage of direct API for recognizing an image:
+
+```csharp
+void InitDirectAPI() {
+	// setup direct API
+    Recognizer directRecognizer = Recognizer.GetSingletonInstance();                   
+    if (directRecognizer.CurrentState == RecognizerDirectAPIState.OFFLINE) { 
+    	// register event handler
+        directRecognizer.OnScanningDone += recognizer_OnScanningDone;
+        // unlock direct API
+        try {
+            directRecognizer.LicenseKey = "Enter license key here";
+        }
+        catch (InvalidLicenseKeyException exception) {
+            // handle license key exception
+        }
+    }
+    // recognize image
+    BitmapImage image = new BitmapImage(new Uri("/path/to/some/file.jpg", UriKind.Absolute));
+    directRecognizer.Recognize(image);
+}
+
+void recognizer_OnScanningDone(IList<Microblink.IRecognitionResult> resultList, RecognitionType recognitionType) {
+    bool resultFound = false;
+    if (recognitionType == RecognitionType.SUCCESSFUL) {                
+        foreach (var result in resultList) {
+            if (result.Valid && !result.Empty) {
+				// display recognition results                                       
+            }
+        }                
+    }
+}
+
+void TerminateDirectAPI() {
+	// terminate direct API
+    Recognizer.GetSingletonInstance().Terminate();
+}
+
+```
+
+## <a name="directAPIStateMachine"></a> Understanding DirectAPI's state machine
+
+DirectAPI's Recognizer singleton is actually a state machine which can be in one of 4 states: `OFFLINE`, `UNLOCKED`, `READY` and `WORKING`. 
+
+- When you obtain the reference to Recognizer singleton, it will be in `OFFLINE` state. 
+- First you need to unlock the Recognizer by providing a valid licence key using `LicenseKey` property(`Licensee` property can also be used if needed). If you attempt to set `LicenseKey` while Recognizer is not in `OFFLINE` state, you will get `InvalidOperationException`.
+- After successful unlocking, Recognizer singleton will move to `UNLOCKED` state.
+- Once in `UNLOCKED` state, you can initialize Recognizer by calling `Initialize` method. If you call `Initialize` method while Recognizer is not in `UNLOCKED` state, you will get `InvalidOperationException`.
+- After successful initialization, Recognizer will move to `READY` state. Now you can call `Recognize` method.
+- When starting recognition with `Recognize` methods, Recognizer will move to `WORKING` state. If you attempt to call these methods while Recognizer is not in `READY` state, you will get `InvalidOperationException`
+- Recognition is performed on background thread so it is safe to call all Recognizer's method from UI thread
+- When recognition is finished, Recognizer first moves back to `READY` state and then returns the result by fireing `OnScanningDone` event. 
+- By calling `Terminate` method, Recognizer singleton will release all its internal resources and will request processing thread to terminate. Note that even after calling `Terminate` you might receive `onScanningDone` event if there was work in progress when `Terminate` was called.
+- `Terminate` method can be called from any Recognizer singleton's state
+- You can observe Recognizer singleton's state via `CurrentState` property
+
+## <a name="directAPIWithRecognizer"></a> Using DirectAPI while RecognizerControl is active
+Both `RecognizerControl` and DirectAPI recognizer use the same internal singleton that manages native code. This singleton handles initialization and termination of native library and propagating recognition settings to native library. If both `RecognizerControl` and DirectAPI attempt to use the same singleton, a race condition will occur. This race condition is always solved in RecognizerControl's favor, i.e.:
+
+- if `RecognizerControl` initializes the internal singleton before DirectAPI, DirectAPI's method `Initialize` will detect that and will make sure that its settings are applied immediately before performing recognition and after recognition `RecognizerControl`'s settings will be restored to internal singleton
+- if DirectAPI initializes the internal singleton before `RecognizerControl`, `RecognizerControl` will detect that and will overwrite internal singleton's settings with its own settings. The side effect is that next call to `Recognize` on DirectAPI's Recognizer will **not** use settings given to `Initialize` method, but will instead use settings given to `RecognizerControl`.
+
+If this raises too much confusion, we suggest not using DirectAPI while `RecognizerControl` is active, instead use `RecognizerControl`'s methods `Recognize` or `RecognizeWithSettings` which will require no race conditions to be resolved.
+
 # <a name="recognitionSettingsAndResults"></a> Recognition settings and results
 
 This chapter will discuss various recognition settings used to configure different recognizers and scan results generated by them.
@@ -410,10 +485,11 @@ This chapter will discuss various recognition settings used to configure differe
 Generic settings affect all enabled recognizers and the whole recognition process. Here is the list of properties that are most relevant:
 
 ##### `bool AllowMultipleScanResults`
-Sets whether or not outputting of multiple scan results from same image is allowed. If that is `true`, it is possible to return multiple recognition results from same image. By default, this option is `false`, i.e. the array of `BaseRecognitionResults` will contain at most 1 element. The upside of setting that option to `false` is the speed - if you enable lots of recognizers, as soon as the first recognizer succeeds in scanning, recognition chain will be terminated and other recognizers will not get a chance to analyze the image. The downside is that you are then unable to obtain multiple results from single image.
+Sets whether or not outputting of multiple scan results from same image is allowed. If that is `true`, it is possible to return multiple recognition results from same image. By default, this option is `false`, i.e. the array of `IRecognitionResult`s will contain at most 1 element. The upside of setting that option to `false` is the speed - if you enable lots of recognizers, as soon as the first recognizer succeeds in scanning, recognition chain will be terminated and other recognizers will not get a chance to analyze the image. The downside is that you are then unable to obtain multiple results from single image.
 
 ##### `int RecognitionTimeout`
-Number of miliseconds _BlinkID_ will attempt to perform the scan before it exits with timeout error. On timeout returned array of `IRecognitionResults` might be null, empty or may contain only elements that are not valid (`Valid` is `false`) or are empty (`Empty` is `true`).
+Number of miliseconds _BlinkID_ will attempt to perform the scan before it exits with timeout error. On timeout returned array of `IRecognitionResult`s might be null, empty or may contain only elements that are not valid (`Valid` is `false`) or are empty (`Empty` is `true`).
+
 ## <a name="mrtd"></a> Scanning machine-readable travel documents
 
 This section discusses the setting up of machine-readable travel documents(MRTD) recognizer and obtaining results from it.
@@ -422,26 +498,34 @@ This section discusses the setting up of machine-readable travel documents(MRTD)
 
 To activate MRTD recognizer, you need to create `MRTDRecognizerSettings` and add it to `IRecognizerSettings` array. You can use the following code snippet to perform that:
 
-```c#
+```csharp
 using Microblink;
 
 private IRecognizerSettings[] setupSettingsArray() {
 	MRTDRecognizerSettings sett = new MRTDRecognizerSettings();
-	
-	// enable detection of MRZ position
-	sett.DetectMRZPosition = true;
-	
+		
 	// now add sett to recognizer settings array that is used to configure
 	// recognition
 	return new IRecognizerSettings[] { sett };
 }
 ```
 
+As can be seen from example, you can tweak MRTD recognition parameters with properties of `MRTDRecognizerSettings`.
+
+##### `AllowUnparsedResults`
+Set this to `true` to allow obtaining results that have not been parsed by SDK. By default this is off. The reason for this is that we want to ensure best possible data quality when returning results. For that matter we internally parse the MRZ and extract all data, taking all possible OCR mistakes into account. However, if you happen to have a document with MRZ that has format our internal parser still does not support, you need to allow returning of unparsed results. Unparsed results will not contain parsed data, but will contain OCR result received from OCR engine, so you can parse data yourself.
+
+##### `ShowMRZ`
+Set this to `true` if you use OnDewarpedImage event and you want to obtain image containing only Machine Readable Zone. By default, this is turned off.
+
+##### `ShowFullDocument`
+Set this to `true` if you use OnDewarpedImage event and you want to obtain image containing full document containing Machine Readable Zone. The document image's orientation will be corrected. By default, this is turned off.
+
 ### Obtaining results from machine-readable travel documents recognizer
 
 MRTD recognizer produces `MRTDRecognitionResult`. You can use `is` operator to check if element in results array is instance of `MRTDRecognitionResult` class. See the following snippet for an example:
 
-```c#
+```csharp
 using Microblink;
 
 public void OnScanningDone(IList<IRecognitionResult> resultList, RecognitionType recognitionType) {   
@@ -480,7 +564,7 @@ Set to the primary indentifier. If there is more than one component, they are se
 Set to the secondary identifier. If there is more than one component, they are separated with space.
 
 ##### `string Issuer`
-Set to three-letter or two-letter code which indicate the issuing State. Three-letter codes are based on `Aplha-3` codes for entities specified in `ISO 3166-1`, with extensions for certain States. Two-letter codes are based on `Aplha-2` codes for entities specified in `ISO 3166-1`, with extensions for certain States.
+Set to three-letter or two-letter code which indicate the issuing State. Three-letter codes are based on `Alpha-3` codes for entities specified in `ISO 3166-1`, with extensions for certain States. Two-letter codes are based on `Alpha-2` codes for entities specified in `ISO 3166-1`, with extensions for certain States.
 
 ##### `string DateOfBirth`
 Set to holder's date of birth in format `YYMMDD`.
@@ -489,7 +573,7 @@ Set to holder's date of birth in format `YYMMDD`.
 Set to document number. Document number contains up to 9 characters.
 
 ##### `string Nationality`
-Set to nationality of the holder represented by a three-letter or two-letter code. Three-letter codes are based on `Alpha-3` codes for entities specified in `ISO 3166-1`, with extensions for certain States. Two-letter codes are based on `Aplha-2` codes for entities specified in `ISO 3166-1`, with extensions for certain States.
+Set to nationality of the holder represented by a three-letter or two-letter code. Three-letter codes are based on `Alpha-3` codes for entities specified in `ISO 3166-1`, with extensions for certain States. Two-letter codes are based on `Alpha-2` codes for entities specified in `ISO 3166-1`, with extensions for certain States.
 
 ##### `string Sex`
 Set to sex of the card holder. Sex is specified by use of the single initial, capital letter `F` for female, `M` for male or `<` for unspecified.
@@ -508,6 +592,180 @@ Set to second optional data. Set to `null` or empty string if not available.
 
 ##### `string MRZText`
 Set to the entire Machine Readable Zone text from ID. This text is usually used for parsing other elements.
+
+## <a name="usdl"></a> Scanning US Driver's licence barcodes
+
+This section discusses the settings for setting up USDL recognizer and explains how to obtain results from it.
+
+### Setting up USDL recognizer
+To activate USDL recognizer, you need to create a `USDLRecognizerSettings` and add it to `IRecognizerSettings` array. You can do this using following code snippet:
+
+```csharp
+using Microblink;
+
+private IRecognizerSettings[] setupSettingsArray() {
+	USDLRecognizerSettings sett = new USDLRecognizerSettings();
+	
+	// enable null quiet zone
+	sett.NullQuietZoneAllowed = true;
+	// enable uncertain scan mode
+    sett.UncertainScanMode = true	
+	
+	// now add sett to recognizer settings array that is used to configure
+	// recognition
+	return new IRecognizerSettings[] { sett };
+}            
+```
+
+As can be seen from example, you can tweak USDL recognition parameters with properties of `USDLRecognizerSettings`.
+
+##### `UncertainScanMode`
+By setting this property to `true`, you will enable scanning of non-standard elements, but there is no guarantee that all data will be read. This option is used when multiple rows are missing (e.g. not whole barcode is printed). Default is `false`.
+
+##### `NullQuietZoneAllowed`
+By setting this property to `true`, you will allow scanning barcodes which don't have quiet zone surrounding it (e.g. text concatenated with barcode). This option can significantly increase recognition time. Default is `false`.
+
+### Obtaining results from USDL recognizer
+
+USDL recognizer produces `USDLRecognitionResult`. You can use `is` operator to check if element in results array is instance of `USDLRecognitionResult`. See the following snippet for an example:
+
+```csharp
+using Microblink;
+
+public void OnScanningDone(IList<IRecognitionResult> resultList, RecognitionType recognitionType) {   
+    if (recognitionType == RecognitionType.SUCCESSFUL) {        
+        foreach (var result in resultList) {
+        	if (result is USDLRecognitionResult) {			    
+			    USDLRecognitionResult usdlResult = (USDLRecognitionResult)result;
+			    // you can use properties of USDLRecognitionResult class to 
+		        // obtain scanned information
+		        if(result.Valid && !result.Empty) {
+		        	bool uncertain = usdlResult.Uncertain;
+		        	string stringData = usdlResult.StringData;
+		        	BarcodeDetailedData rawData = usdlResult.RawData;
+
+		        	// if you need specific parsed driver's license element, you can
+					// use GetField method
+					// for example, to obtain AAMVA version, you should use:
+					string aamvaVersion = usdlResult.GetField(USDLRecognitionResult.kAamvaVersionNumber);				    				    				    
+			    } else {
+		        	// not all relevant data was scanned, ask user
+		        	// to try again
+		        }   
+			}            
+        }                 
+    }
+}
+```
+
+Available properties are:
+
+##### `bool Valid`
+Set to `true` if scan result is valid, i.e. if all required elements were scanned with good confidence and can be used. If `false` is returned that indicates that some crucial data fields are missing. You should ask user to try scanning again. If you keep getting `false` (i.e. invalid data) for certain document, please report that as a bug to [help.microblink.com](http://help.microblink.com). Please include high resolution photographs of problematic documents.
+
+##### `bool Empty`
+Set to `true` if scan result is empty, i.e. nothing was scanned. All getters should return `null` for empty result.
+
+##### `bool Uncertain`
+Indicates if scanned barcode is uncertain. This can be `true` only if scanning of uncertain barcodes is allowed, as explained earlier.
+
+##### `string StringData`
+This property holds string representation of barcode contents. Note that PDF417 barcode can contain binary data so sometimes it makes little sense to obtain only string representation of barcode data.
+
+##### `BarcodeDetailedData RawData`
+This property contains information about barcode's binary layout. If you only need to access containing byte array, you can call method `GetAllData` of `BarcodeDetailedData` object.
+
+Method for retrieving specific driver's license element is:
+
+##### `string GetField(string)`
+This method will return a parsed US Driver's licence element. The method requires a key that defines which element should be returned and returns either a string representation of that element or `null` if that element does not exist in barcode. To see a list of available keys, refer to [Keys for obtaining US Driver's license data](DriversLicenseKeys.md)
+
+## <a name="usdl"></a> Scanning United Kingdom's driver's licences
+
+This section discusses the setting up of UK Driver's Licence recognizer and obtaining results from it.
+
+### Setting up UK Driver's Licence recognizer
+To activate UKDL recognizer, you need to create a `UKDLRecognizerSettings` and add it to `IRecognizerSettings` array. You can do this using following code snippet:
+
+```csharp
+using Microblink;
+
+private IRecognizerSettings[] setupSettingsArray() {
+	UKDLRecognizerSettings sett = new UKDLRecognizerSettings();
+	
+	// now add sett to recognizer settings array that is used to configure
+	// recognition
+	return new IRecognizerSettings[] { sett };
+}            
+```
+
+As can be seen from example, you can tweak UKDL recognition parameters with properties of `UKDLRecognizerSettings`.
+
+##### `ExtractIssueDate`
+Defines if issue date should be extracted. Default is `true`.
+
+##### `ExtractExpiryDate`
+Defines if expiry date should be extracted. Default is `true`.
+
+##### `ExtractAddress`
+Defines if address should be extracted. Default is `true`.
+
+### Obtaining results from UK Driver's Licence recognizer
+
+UKDL recognizer produces `UKDLRecognitionResult`. You can use `is` operator to check if element in results array is instance of `UKDLRecognitionResult`. See the following snippet for an example:
+
+```csharp
+using Microblink;
+
+public void OnScanningDone(IList<IRecognitionResult> resultList, RecognitionType recognitionType) {   
+    if (recognitionType == RecognitionType.SUCCESSFUL) {        
+        foreach (var result in resultList) {
+        	if (result is UKDLRecognitionResult) {			    
+			    UKDLRecognitionResult ukdlResult = (UKDLRecognitionResult)result;
+			    // you can use properties of UKDLRecognitionResult class to 
+		        // obtain scanned information
+		        if(result.Valid && !result.Empty) {
+		        	string firstName = ukdlResult.FirstName;
+               		string lastName = ukdlResult.LastName;
+               		string driverNumber = ukdlResult.DriverNumber;		        					    				  
+			    } else {
+		        	// not all relevant data was scanned, ask user
+		        	// to try again
+		        }   
+			}            
+        }                 
+    }
+}
+```
+
+Available properties are:
+
+##### `bool Valid`
+Set to `true` if scan result is valid, i.e. if all required elements were scanned with good confidence and can be used. If `false` is returned that indicates that some crucial data fields are missing. You should ask user to try scanning again. If you keep getting `false` (i.e. invalid data) for certain document, please report that as a bug to [help.microblink.com](http://help.microblink.com). Please include high resolution photographs of problematic documents.
+
+##### `bool Empty`
+Set to `true` if scan result is empty, i.e. nothing was scanned. All getters should return `null` for empty result.
+
+##### `string FirstName`
+Set to the first name of the Driver's Licence owner.
+
+##### `string LastName`
+Set to the last name of the Driver's Licence owner.
+
+##### `string Address`
+Set to the address of the Driver's Licence owner.
+
+##### `string DriverNumber`
+Set to the driver number.
+
+##### `string DateOfBirth`
+Set to the date of birth of the Driver's Licence owner.
+
+##### `string IssueDate`
+Set to the issue date of the Driver's Licence.
+
+##### `string DateOfExpiry`
+Set to the expiry date of the Driver's Licence.
 
 # <a name="troubleshoot"></a> Troubleshooting
 
@@ -536,7 +794,7 @@ If you are having problems with scanning certain items, undesired behaviour on s
 
 * enable logging to get the ability to see what is library doing. To enable logging, put this line in your application:
 
-	```c#
+	```csharp
 	Microblink.Log.Level = Microblink.Log.LogLevel.Verbose;	
 	```
 
