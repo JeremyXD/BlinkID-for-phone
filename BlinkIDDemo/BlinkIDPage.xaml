@@ -74,6 +74,7 @@
         </Grid.Resources>
         
         <UserControls:RecognizerControl x:Name="mRecognizer" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+        <UserControls:OCRDisplayControl x:Name="mOCRDisplay"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
         <local:Rectangle x:Name="mRectangle"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
         <Button x:Name="mLightButton"
                 Click="mLightButton_Click"

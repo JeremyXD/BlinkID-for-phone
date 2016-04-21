@@ -1,5 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build" ToolsVersion="4.0">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -133,28 +132,7 @@
     <None Include="Properties\WMAppManifest.xml">
       <SubType>Designer</SubType>
     </None>
-    <None Include="WPLibAssets\Data\ocr_model.dat">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="WPLibAssets\Shaders\advanced_pixel.cso">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="WPLibAssets\Shaders\advanced_pixel_a1.cso">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="WPLibAssets\Shaders\advanced_pixel_a1c.cso">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="WPLibAssets\Shaders\advanced_vertex.cso">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="WPLibAssets\Shaders\direct_pixel.cso">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="WPLibAssets\Shaders\direct_vertex.cso">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
+  <None Include="WPLibAssets\Data\ocr_model.dat"><CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory></None><None Include="WPLibAssets\Shaders\advanced_pixel_a1.cso"><CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory></None><None Include="WPLibAssets\Shaders\advanced_pixel_a1c.cso"><CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory></None><None Include="WPLibAssets\Shaders\advanced_vertex.cso"><CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory></None><None Include="WPLibAssets\Shaders\direct_pixel.cso"><CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory></None><None Include="WPLibAssets\Shaders\direct_vertex.cso"><CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory></None></ItemGroup>
   <ItemGroup>
     <Content Include="Assets\AlignmentGrid.png" />
     <Content Include="Assets\ApplicationIcon.png">
@@ -215,23 +193,9 @@
     <Reference Include="Microsoft.Expression.Controls, Version=3.9.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="BlinkID, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\WPLib$(Configuration)\BlinkID.dll</HintPath>
-    </Reference>
-    <Reference Include="Microblink, Version=255.255.255.255, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\WPLib$(Configuration)\Microblink.winmd</HintPath>
-    </Reference>
-  </ItemGroup>
+    <Reference Include="BlinkID, Version=1.1.0, Culture=neutral, processorArchitecture=MSIL"><SpecificVersion>False</SpecificVersion><HintPath>..\WPLib$(Configuration)\BlinkID.dll</HintPath></Reference><Reference Include="Microblink, Version=255.255.255.255, Culture=neutral, processorArchitecture=MSIL"><SpecificVersion>False</SpecificVersion><HintPath>..\WPLib$(Configuration)\Microblink.winmd</HintPath></Reference></ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\$(TargetFrameworkIdentifier)\$(TargetFrameworkVersion)\Microsoft.$(TargetFrameworkIdentifier).$(TargetFrameworkVersion).Overrides.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\$(TargetFrameworkIdentifier)\$(TargetFrameworkVersion)\Microsoft.$(TargetFrameworkIdentifier).CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+  
   <ProjectExtensions />
-</Project>
+  </Project>

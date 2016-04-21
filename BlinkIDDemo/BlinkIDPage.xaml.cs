@@ -31,13 +31,25 @@ namespace BlinkIDDemo
             mRecognizer.LicenseKey = "Add license key here"; 
 
             // add MRTD recognizer settings
-            mRecognizer.RecognizerSettings = new Microblink.IRecognizerSettings[] { new Microblink.MRTDRecognizerSettings() };
+            mRecognizer.RecognizerSettings = new Microblink.IRecognizerSettings[] { new Microblink.MRTDRecognizerSettings(), 
+                new Microblink.EUDLRecognizerSettings(EUDLCountry.EUDL_COUNTRY_AUTO),
+                new Microblink.MyKadRecognizerSettings() };
+
+            // set camera preview scale
+            mRecognizer.PreviewScale = CameraPreviewScale.UniformToFill;
 
             // these three events must be handled
             mRecognizer.OnCameraError += mRecognizer_OnCameraError;            
             mRecognizer.OnScanningDone += mRecognizer_OnScanningDone;
-            mRecognizer.OnInitializationError += mRecognizer_OnInitializationError;            
+            mRecognizer.OnInitializationError += mRecognizer_OnInitializationError;
+
+            // enable display of OCR results
+            mRecognizer.OnDisplayOcrResult += mRecognizer_OnDisplayOcrResult;
         }
+
+        void mRecognizer_OnDisplayOcrResult(Microblink.OCRResult result) {
+            mOCRDisplay.DisplayOCRResult(result);
+        }        
 
         /// <summary>
         /// Handles initialization error(invalid license)
@@ -66,23 +78,48 @@ namespace BlinkIDDemo
                 // Find MRTD result in list of results. Should be the only result in the list.
                 bool resultFound = false;
                 foreach (var result in resultList) {
-                    // check if result is a MRTD result
-                    if (result.Valid && !result.Empty && result is Microblink.MRTDRecognitionResult) {
-                        // obtain the MRTD result
-                        Microblink.MRTDRecognitionResult mrtdResult = (Microblink.MRTDRecognitionResult)result;
-                        // set it as input for results page
-                        ResultsPage.results = mrtdResult;
-                        // mark as found
-                        resultFound = true;
-                        break;                        
+                    if (result.Valid && !result.Empty) {
+                        // check if result is a MRTD result
+                        if (result is Microblink.MRTDRecognitionResult) {
+                            // obtain the MRTD result
+                            Microblink.MRTDRecognitionResult mrtdResult = (Microblink.MRTDRecognitionResult)result;
+                            // set it as input for results page
+                            ResultsPage.results = mrtdResult.Elements;
+                            ResultsPage.resultsType = "MRTD";
+                            // mark as found
+                            resultFound = true;
+                            break;
+                        }
+                            // check if result is a MyKad result
+                        else if (result is Microblink.MyKadRecognitionResult) {
+                            // obtain the MyKad result
+                            Microblink.MyKadRecognitionResult mykadResult = (Microblink.MyKadRecognitionResult)result;
+                            // set it as input for results page
+                            ResultsPage.results = mykadResult.Elements;
+                            ResultsPage.resultsType = "MyKad";
+                            // mark as found
+                            resultFound = true;
+                            break;
+                        }
+                            // check if result is a EUDL result
+                        else if (result is Microblink.EUDLRecognitionResult) {
+                            // obtain the EUDL result
+                            Microblink.EUDLRecognitionResult eudlResult = (Microblink.EUDLRecognitionResult)result;
+                            // set it as input for results page
+                            ResultsPage.results = eudlResult.Elements;
+                            ResultsPage.resultsType = "EUDL";
+                            // mark as found
+                            resultFound = true;
+                            break;
+                        }
                     }
                 }
                 // navigate to results page if MRTD result was found
                 if (resultFound) {
                     NavigationService.Navigate(new Uri("/ResultsPage.xaml", UriKind.Relative));
-                }                
+                }
             }
-        }        
+        }
 
         /// <summary>
         /// Here camera errors should be handled.

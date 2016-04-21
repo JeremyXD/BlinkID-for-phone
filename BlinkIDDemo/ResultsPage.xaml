@@ -32,8 +32,8 @@
                 <RowDefinition Height="100" />
             </Grid.RowDefinitions>
             <ScrollViewer VerticalScrollBarVisibility="Visible" >
-                <Grid>                
-                    <Grid HorizontalAlignment="Stretch" Height="104" VerticalAlignment="Top" >
+                <StackPanel x:Name="mContent">                
+                    <!--<Grid HorizontalAlignment="Stretch" Height="104" VerticalAlignment="Top" >
                         <TextBlock Text="Firstname" HorizontalAlignment="Stretch" TextWrapping="Wrap" VerticalAlignment="Top"/>
                         <TextBox x:Name="mFirstnameBox" HorizontalAlignment="Stretch" Height="72" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Margin="0,32,0,0" />
                     </Grid>
@@ -80,8 +80,8 @@
                     <Grid HorizontalAlignment="Stretch" Height="254" VerticalAlignment="Top" Margin="0,1144,0,0">
                         <TextBlock Text="Scanned Text" HorizontalAlignment="Stretch" TextWrapping="Wrap" VerticalAlignment="Top"/>
                         <TextBox x:Name="mRawBox" HorizontalAlignment="Stretch" Height="222" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Margin="0,32,0,0" FontSize="20" />
-                    </Grid>
-                </Grid>
+                    </Grid>-->
+                </StackPanel>
             </ScrollViewer>
             <Grid HorizontalAlignment="Stretch" VerticalAlignment="Bottom" >                
                 <Button  Content="OK" HorizontalAlignment="Right" VerticalAlignment="Bottom"  Margin="0,0,27,-84" Width="150" Click="Button_Click" />

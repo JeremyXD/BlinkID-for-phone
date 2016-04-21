@@ -16,7 +16,8 @@
   * [Generic settings](#genericSettings)
   * [Scanning machine-readable travel documents](#mrtd)
   * [Scanning US Driver's licence barcodes](#usdl)
-  * [Scanning United Kingdom's driver's licences](#usdl)
+  * [Scanning EU driver's licences](#eudl)
+  * [Scanning Malaysian MyKad ID documents](#myKad)
 * [Troubleshooting](#troubleshoot)
   * [Integration problems](#integrationTroubleshoot)
   * [SDK problems](#sdkTroubleshoot)
@@ -680,39 +681,55 @@ Method for retrieving specific driver's license element is:
 ##### `string GetField(string)`
 This method will return a parsed US Driver's licence element. The method requires a key that defines which element should be returned and returns either a string representation of that element or `null` if that element does not exist in barcode. To see a list of available keys, refer to [Keys for obtaining US Driver's license data](DriversLicenseKeys.md)
 
-## <a name="usdl"></a> Scanning United Kingdom's driver's licences
+## <a name="eudl"></a> Scanning EU driver's licences
 
-This section discusses the setting up of UK Driver's Licence recognizer and obtaining results from it.
+This section discusses the setting up of EU Driver's Licence recognizer and obtaining results from it. United Kingdom's and German's driver's licenses are supported.
 
-### Setting up UK Driver's Licence recognizer
-To activate UKDL recognizer, you need to create a `UKDLRecognizerSettings` and add it to `IRecognizerSettings` array. You can do this using following code snippet:
+### Setting up EU Driver's Licence recognizer
+
+To activate EUDL recognizer, you need to create `EUDLRecognizerSettings` and add it to `IRecognizerSettings` array. You can use the following code snippet to perform that:
 
 ```csharp
 using Microblink;
 
 private IRecognizerSettings[] setupSettingsArray() {
-	UKDLRecognizerSettings sett = new UKDLRecognizerSettings();
+	// pass country to EUDLRecognizerSettings constructor, supported countries are:
+	// - UK (EUDLCountry.EUDL_COUNTRY_UK)
+	// - Germany (EUDLCountry.EUDL_COUNTRY_GERMANY)
+	EUDLRecognizerSettings sett = new EUDLRecognizerSettings(EUDLCountry.EUDL_COUNTRY_UK);
 	
 	// now add sett to recognizer settings array that is used to configure
 	// recognition
 	return new IRecognizerSettings[] { sett };
-}            
+}
 ```
 
-As can be seen from example, you can tweak UKDL recognition parameters with properties of `UKDLRecognizerSettings`.
+You can also tweak EUDL recognition parameters with properties of `EUDLRecognizerSettings`.
 
-##### `ExtractIssueDate`
+##### `Country`
+Activates scanning settings for given country. United Kingdom's and German's driver's licenses are supported.
+
+##### `ShouldExtractIssueDate`
 Defines if issue date should be extracted. Default is `true`.
 
-##### `ExtractExpiryDate`
+##### `ShouldExtractExpiryDate`
 Defines if expiry date should be extracted. Default is `true`.
 
-##### `ExtractAddress`
+##### `ShouldExtractPersonalNumber`
+Defines if personal number should be extracted. Default is `true`.
+
+##### `ShouldExtractIssuingAuthority`
+Defines if issuing authority should be extracted. Default is `true`.
+
+##### `ShouldExtractAddress`
 Defines if address should be extracted. Default is `true`.
 
-### Obtaining results from UK Driver's Licence recognizer
+##### `ShouldShowFullDocument`
+Set this property to `true` if you want to retrieve dewarped full document images. Turned off by default.
 
-UKDL recognizer produces `UKDLRecognitionResult`. You can use `is` operator to check if element in results array is instance of `UKDLRecognitionResult`. See the following snippet for an example:
+### Obtaining results from EU Driver's Licence recognizer
+
+EUDL recognizer produces `EUDLRecognitionResult`. You can use `is` operator to check if element in results array is instance of `EUDLRecognitionResult`. See the following snippet for an example:
 
 ```csharp
 using Microblink;
@@ -720,14 +737,103 @@ using Microblink;
 public void OnScanningDone(IList<IRecognitionResult> resultList, RecognitionType recognitionType) {   
     if (recognitionType == RecognitionType.SUCCESSFUL) {        
         foreach (var result in resultList) {
-        	if (result is UKDLRecognitionResult) {			    
-			    UKDLRecognitionResult ukdlResult = (UKDLRecognitionResult)result;
-			    // you can use properties of UKDLRecognitionResult class to 
+        	if (result is EUDLRecognitionResult) {			    
+			    EUDLRecognitionResult eudlResult = (EUDLRecognitionResult)result;
+			    // you can use properties of EUDLRecognitionResult class to 
 		        // obtain scanned information
 		        if(result.Valid && !result.Empty) {
-		        	string firstName = ukdlResult.FirstName;
-               		string lastName = ukdlResult.LastName;
-               		string driverNumber = ukdlResult.DriverNumber;		        					    				  
+		        	string firstName = eudlResult.FirstName;
+               		string lastName = eudlResult.LastName;
+               		string driverNumber = eudlResult.DriverNumber;		        					    				  
+			    } else {
+		        	// not all relevant data was scanned, ask user
+		        	// to try again
+		        }   
+			}            
+        }                 
+    }
+}
+```
+
+
+Available properties are:
+
+##### `bool Valid`
+Set to `true` if scan result is valid, i.e. if all required elements were scanned with good confidence and can be used. If `false` is returned that indicates that some crucial data fields are missing. You should ask user to try scanning again. If you keep getting `false` (i.e. invalid data) for certain document, please report that as a bug to [help.microblink.com](http://help.microblink.com). Please include high resolution photographs of problematic documents.
+
+##### `bool Empty`
+Set to `true` if scan result is empty, i.e. nothing was scanned. All getters should return `null` for empty result.
+
+##### `string FirstName`
+Set to the first name of the Driver's Licence owner.
+
+##### `string LastName`
+Set to the last name of the Driver's Licence owner.
+
+##### `string DriverNumber`
+Set to the driver number.
+
+##### `string Address`
+Set to the address of the Driver's Licence owner.
+
+##### `string DateOfBirth`
+Set to the date of birth of the Driver's Licence owner.
+
+##### `string IssueDate`
+Set to the issue date of the Driver's Licence.
+
+##### `string DateOfExpiry`
+Set to the expiry date of the Driver's Licence.
+
+##### `string IssuingAuthority`
+Set to the document issuing authority.
+
+##### `EUDLCountry Country`
+Set to the country where the Driver's License has been issued or null if country is unknown.
+
+
+## <a name="myKad"></a> Scanning Malaysian MyKad ID documents
+
+This section will discuss the setting up of Malaysian ID documents (MyKad) recognizer and obtaining results from it.
+
+### Setting up MyKad recognizer
+
+To activate MyKad recognizer, you need to create `MyKadRecognizerSettings` and add it to `IRecognizerSettings` array. You can use the following code snippet to perform that:
+
+```csharp
+using Microblink;
+
+private IRecognizerSettings[] setupSettingsArray() {	
+	MyKadRecognizerSettings sett = new MyKadRecognizerSettings();
+	
+	// now add sett to recognizer settings array that is used to configure
+	// recognition
+	return new IRecognizerSettings[] { sett };
+}
+```
+
+You can also tweak MyKad recognition parameters with properties of `MyKadRecognizerSettings`.
+
+##### `ShouldShowFullDocument`
+Set this to `true` if you use OnDewarpedImage event and you want to obtain image containing full Malaysian ID card. The document image's orientation will be corrected. By default, this is turned off.
+
+### Obtaining results from MyKad recognizer
+
+MyKad recognizer produces `MyKadRecognitionResult`. You can use `is` operator to check if element in results array is instance of `MyKadRecognitionResult` class. See the following snippet for an example:
+
+```csharp
+using Microblink;
+
+public void OnScanningDone(IList<IRecognitionResult> resultList, RecognitionType recognitionType) {   
+    if (recognitionType == RecognitionType.SUCCESSFUL) {        
+        foreach (var result in resultList) {
+        	if (result is MyKadRecognitionResult) {			    
+			    MyKadRecognitionResult mykadResult = (MyKadRecognitionResult)result;
+			    // you can use properties of MyKadRecognitionResult class to 
+		        // obtain scanned information
+		        if(result.Valid && !result.Empty) {
+		        	string fullName = mykadResult.FullName;
+               		string nricNumber = mykadResult.NRICNumber;
 			    } else {
 		        	// not all relevant data was scanned, ask user
 		        	// to try again
@@ -746,26 +852,26 @@ Set to `true` if scan result is valid, i.e. if all required elements were scanne
 ##### `bool Empty`
 Set to `true` if scan result is empty, i.e. nothing was scanned. All getters should return `null` for empty result.
 
-##### `string FirstName`
-Set to the first name of the Driver's Licence owner.
+##### `string NRICNumber`
+Returns the National Registration Identity Card Number.
 
-##### `string LastName`
-Set to the last name of the Driver's Licence owner.
+##### `string Sex`
+Returns the sex of the card holder. Possible values are:
 
-##### `string Address`
-Set to the address of the Driver's Licence owner.
-
-##### `string DriverNumber`
-Set to the driver number.
+- `M` for male holder
+- `F` for female holder
 
 ##### `string DateOfBirth`
-Set to the date of birth of the Driver's Licence owner.
+Returns the date of birth of card holder. The date format is `YYMMDD`.
 
-##### `string IssueDate`
-Set to the issue date of the Driver's Licence.
+##### `string FullName`
+Returns the full name of the card holder.
 
-##### `string DateOfExpiry`
-Set to the expiry date of the Driver's Licence.
+##### `string Address`
+Returns the address of the card holder.
+
+##### `string Religion`
+Returns the religion of the card holder. Possible values are `ISLAM` and `null`.
 
 # <a name="troubleshoot"></a> Troubleshooting
 

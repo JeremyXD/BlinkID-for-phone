@@ -85,9 +85,9 @@ namespace BlinkIDDirectAPIDemo
                 image.SetSource(e.ChosenPhoto);
 
                 // setup direct API
-                Recognizer directRecognizer = Recognizer.GetSingletonInstance();               
+                Recognizer directRecognizer = Recognizer.GetSingletonInstance();
                 // register event handlers
-                if (directRecognizer.CurrentState == RecognizerDirectAPIState.OFFLINE) { 
+                if (directRecognizer.CurrentState == RecognizerDirectAPIState.OFFLINE) {
                     directRecognizer.OnScanningDone += mRecognizer_OnScanningDone;
                     // unlock direct API
                     try {

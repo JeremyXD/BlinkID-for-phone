@@ -19,7 +19,8 @@ namespace BlinkIDDemo
         /// <summary>
         /// static field for sending result data to the page
         /// </summary>
-        public static Microblink.MRTDRecognitionResult results = null;
+        public static IReadOnlyDictionary<string, object> results = null;
+        public static string resultsType = null;
 
         /// <summary>
         /// Default constructor
@@ -44,39 +45,32 @@ namespace BlinkIDDemo
         /// Fills out form fields with recognition results.
         /// </summary>
         /// <param name="e"></param>
-        protected override void OnNavigatedTo(NavigationEventArgs e) {
+        protected override void OnNavigatedTo(NavigationEventArgs e) {            
             // call default behaviour
-            base.OnNavigatedTo(e);
+            base.OnNavigatedTo(e);            
+            // clear form fields
+            mContent.Children.Clear();
             // if results have been passed copy them to form fields
             if (results != null) {
-                mLastnameBox.Text = results.PrimaryID;
-                mFirstnameBox.Text = results.SecondaryID;
-                mSexBox.Text = results.Sex;
-                mDateOfBirthBox.Text = results.DateOfBirth;
-                mNationalityBox.Text = results.Nationality;
-                mDocumentCodeBox.Text = results.DocumentCode;
-                mDocumentNumberBox.Text = results.DocumentNumber;
-                mIssuerBox.Text = results.Issuer;
-                mDateOfExpiryBox.Text = results.DateOfExpiry;
-                mOptional1Box.Text = results.Optional1;
-                mOptional2Box.Text = results.Optional2;
-                mRawBox.Text = results.MRZText;
-                // invalidate results
-                results = null;
+                StackPanel typePanel = new StackPanel() { HorizontalAlignment = System.Windows.HorizontalAlignment.Stretch, Margin = new Thickness(0, 0, 0, 40) };
+                TextBlock typeLabel = new TextBlock() { Text = "Result Type: " + resultsType, HorizontalAlignment = System.Windows.HorizontalAlignment.Stretch, TextWrapping = TextWrapping.Wrap, FontSize = 27 };
+                typePanel.Children.Add(typeLabel);
+                mContent.Children.Add(typePanel);
+                foreach (var key in results.Keys) {
+                    if (key != null && results[key] != null) {
+                        StackPanel panel = new StackPanel() { HorizontalAlignment = System.Windows.HorizontalAlignment.Stretch, Margin = new Thickness(0, 0, 0, 20) };
+                        TextBlock label = new TextBlock() { Text = key, HorizontalAlignment = System.Windows.HorizontalAlignment.Stretch, TextWrapping = TextWrapping.Wrap };
+                        TextBox textbox = new TextBox() { Text = results[key].ToString(), HorizontalAlignment = System.Windows.HorizontalAlignment.Stretch, TextWrapping = TextWrapping.Wrap };
+                        panel.Children.Add(label);
+                        panel.Children.Add(textbox);
+                        mContent.Children.Add(panel);
+                    }
+                }
             } else {
-                // clear form fields
-                mLastnameBox.Text = "";
-                mFirstnameBox.Text = "";                
-                mSexBox.Text = "";
-                mDateOfBirthBox.Text = "";
-                mNationalityBox.Text = "";
-                mDocumentCodeBox.Text = "";
-                mDocumentNumberBox.Text = "";
-                mIssuerBox.Text = "";
-                mDateOfExpiryBox.Text = "";
-                mOptional1Box.Text = "";
-                mOptional2Box.Text = "";
-                mRawBox.Text = "";
+                StackPanel typePanel = new StackPanel() { HorizontalAlignment = System.Windows.HorizontalAlignment.Stretch, Margin = new Thickness(0, 0, 0, 40) };
+                TextBlock typeLabel = new TextBlock() { Text = "No results found", HorizontalAlignment = System.Windows.HorizontalAlignment.Stretch, TextWrapping = TextWrapping.Wrap, FontSize = 27 };
+                typePanel.Children.Add(typeLabel);
+                mContent.Children.Add(typePanel);
             }
         }
 

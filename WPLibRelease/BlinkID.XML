@@ -745,26 +745,6 @@
             </summary>
             <returns></returns>
         </member>
-        <member name="P:Microblink.UserControls.BaseCameraControl.MarginLeft">
-            <summary>
-            Left camera control margin
-            </summary>
-        </member>
-        <member name="P:Microblink.UserControls.BaseCameraControl.MarginRight">
-            <summary>
-            Right camera control margin
-            </summary>
-        </member>
-        <member name="P:Microblink.UserControls.BaseCameraControl.MarginTop">
-            <summary>
-            Top camera control margin
-            </summary>
-        </member>
-        <member name="P:Microblink.UserControls.BaseCameraControl.MarginBottom">
-            <summary>
-            Bottom camera control margin
-            </summary>
-        </member>
         <member name="P:Microblink.UserControls.BaseCameraControl.PreviewScale">
             <summary>
             Camera preview scale property
@@ -830,6 +810,11 @@
         <member name="T:Microblink.UserControls.BaseCameraControl.AutoFocusFailedEventHandler">
             <summary>
             Event handler for autofocus failure.
+            </summary>
+        </member>
+        <member name="M:Microblink.UserControls.OCRDisplayControl.InitializeComponent">
+            <summary>
+            InitializeComponent
             </summary>
         </member>
         <member name="T:Microblink.UserControls.RecognitionType">
@@ -1028,7 +1013,7 @@
             To handle recognition messages add a handler to OnDisplayMessage event.
             </summary>
         </member>
-        <member name="M:Microblink.UserControls.RecognizerControl.DisplayOcrResult(Microblink.Recognition.OcrResult)">
+        <member name="M:Microblink.UserControls.RecognizerControl.DisplayOcrResult(Microblink.OCRResult)">
             <summary>
             This handler just raises an OnDisplayOcrResult event.
             To handle displaying OCR results add a handler to OnDisplayOcrResult event.

@@ -1,5 +1,24 @@
 # Release notes
 
+
+## 1.1.0
+
+- EUDL recognition added to demo application
+- initial implementation of OCRDisplayControl
+- OCR results implemented 
+- MyKad recognition added to demo application
+- Fixed RecognizerControl scaling & ROI calculation
+- Fixed bug in DirectX shaders that severely impaired OCR detection
+- Fixed ProductID crash when developing on Windows Phone 10
+- Introduced FaceDetector and automated country detection for EUDL recognizer
+- Added detector API and DetectorRecognizer
+- Introduced EUDLRecognizer which reads German and UK driver's licenses
+- Removed UKDLRecognizer
+- Improved document detection algorithm
+- MRTD recognizer optimized for speed
+- Better handling of FullName, FullAddress, Height and Weight of cardholder
+- Reading Malaysian ID - MyKad
+
 ## 1.0.0
 
 - improved performance and quality of United Kingdom's Driver's Licence scanning
