@@ -28,7 +28,9 @@
 
 The package contains Visual Studio 2012 solution(can open in VS 2013) that contains everything you need to get you started with _BlinkID_ library. Demo project _BlinkIDDemo_ for Windows Phone 8.0 is included in solution containing the example use of _BlinkID_ library.
  
-_BlinkID_ is supported on Windows Phone 8.0. Windows Phone 8.1 can be supported with minor changes and Windows Phone 10 is expected to be supported soon.
+_BlinkID_ is supported on Windows Phone 8.0. Windows Phone 8.1 can be supported with minor changes.
+
+**This project is no longer actively maintained.**
 
 # <a name="quickStart"></a> Quick Start
 
